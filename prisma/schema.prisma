@@ -12,10 +12,32 @@ datasource db {
 }
 
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Tweet {
+    id String @id  @default(uuid())
+    userId String
+    content String
+    createdAt DateTime  @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    likes Like[]
+
+    @@unique([createdAt, id])
+    @@index([userId])
+
+}
+model Like {
+    userId String
+    tweetId String
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Tweet Tweet @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+
+    @@id([userId, tweetId])
+
+    @@index([userId])
+    @@index([tweetId])
+
 }
 
 // Necessary for Next auth
@@ -57,6 +79,10 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    tweets        Tweet[]
+    likes         Like[]
+    followers  User[] @relation(name: "Followers")
+    follows  User[] @relation(name: "Followers")
 }
 
 model VerificationToken {
